@@ -585,7 +585,8 @@ function InteractiveGalaxyCanvas() {
         <OrbitControls
           enableZoom
           enablePan={false}
-          autoRotate={false}
+          autoRotate={true}
+          autoRotateSpeed={0.6}
           enableDamping
           dampingFactor={0.06}
           minDistance={4}

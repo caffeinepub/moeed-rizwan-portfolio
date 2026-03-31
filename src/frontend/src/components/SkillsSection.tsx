@@ -34,6 +34,8 @@ const PROFICIENCY_BARS = [
   { label: "MERN Stack", pct: 96, color: "#00d4ff", color2: "#34d399" },
   { label: "Python / Django", pct: 93, color: "#a855f7", color2: "#f472b6" },
   { label: "AI / Automation", pct: 88, color: "#34d399", color2: "#818cf8" },
+  { label: "On-Page SEO", pct: 92, color: "#34d399", color2: "#00d4ff" },
+  { label: "Technical SEO", pct: 88, color: "#818cf8", color2: "#f472b6" },
 ];
 
 function SkillPill({
