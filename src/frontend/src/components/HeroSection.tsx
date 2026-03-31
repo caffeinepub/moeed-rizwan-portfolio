@@ -1,7 +1,8 @@
+import { OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ChevronDown, Download, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { useDeviceCapability } from "../hooks/useDeviceCapability";
 
@@ -168,8 +169,10 @@ function BrightStar({
   );
 }
 
-function HeroGalaxy({ isMobile }: { isMobile: boolean }) {
+// Standalone galaxy mesh for use inside its own Canvas
+function InteractiveGalaxyMesh() {
   const groupRef = useRef<THREE.Group>(null);
+  const isDragging = useRef(false);
 
   const { positions, colors } = useMemo(() => {
     const totalParticles = 7000;
@@ -191,12 +194,11 @@ function HeroGalaxy({ isMobile }: { isMobile: boolean }) {
       pos[i * 3 + 1] = r * Math.sin(phi) * 0.12;
       pos[i * 3 + 2] = r * Math.sin(theta);
 
-      // Warm white → orange → pale yellow
       const t = r / coreRadius;
       const c = new THREE.Color();
       c.lerpColors(
-        new THREE.Color(1.0, 0.98, 0.95), // near-white hot center
-        new THREE.Color(1.0, 0.55, 0.15), // orange outer core
+        new THREE.Color(1.0, 0.98, 0.95),
+        new THREE.Color(1.0, 0.55, 0.15),
         t,
       );
       col[i * 3] = c.r;
@@ -221,19 +223,18 @@ function HeroGalaxy({ isMobile }: { isMobile: boolean }) {
       pos[idx * 3 + 1] = y;
       pos[idx * 3 + 2] = z;
 
-      // Warm white near center → blue-white → purple-blue at edge
       const t = (radius - coreRadius) / (maxRadius - coreRadius);
       const c = new THREE.Color();
       if (t < 0.5) {
         c.lerpColors(
-          new THREE.Color(1.0, 0.95, 0.88), // warm white
-          new THREE.Color(0.75, 0.85, 1.0), // blue-white
+          new THREE.Color(1.0, 0.95, 0.88),
+          new THREE.Color(0.75, 0.85, 1.0),
           t * 2,
         );
       } else {
         c.lerpColors(
-          new THREE.Color(0.75, 0.85, 1.0), // blue-white
-          new THREE.Color(0.45, 0.3, 0.85), // purple-blue
+          new THREE.Color(0.75, 0.85, 1.0),
+          new THREE.Color(0.45, 0.3, 0.85),
           (t - 0.5) * 2,
         );
       }
@@ -245,52 +246,46 @@ function HeroGalaxy({ isMobile }: { isMobile: boolean }) {
     return { positions: pos, colors: col };
   }, []);
 
+  // Auto-rotate only when not dragging
   useFrame((_, delta) => {
-    if (groupRef.current) {
+    if (groupRef.current && !isDragging.current) {
       groupRef.current.rotation.y += delta * 0.04;
     }
   });
 
-  if (isMobile) return null;
-
   return (
-    <group position={[2.8, 0, 0]} scale={1.2}>
-      <group ref={groupRef}>
-        {/* Galaxy particle field */}
-        <points>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              args={[positions, 3]}
-            />
-            <bufferAttribute attach="attributes-color" args={[colors, 3]} />
-          </bufferGeometry>
-          <pointsMaterial
-            size={0.025}
-            vertexColors
-            transparent
-            opacity={0.95}
-            sizeAttenuation
-          />
-        </points>
+    <group ref={groupRef}>
+      {/* Galaxy particle field */}
+      <points>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+          <bufferAttribute attach="attributes-color" args={[colors, 3]} />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.025}
+          vertexColors
+          transparent
+          opacity={0.95}
+          sizeAttenuation
+        />
+      </points>
 
-        {/* Bright core glow — outer halo */}
-        <mesh>
-          <sphereGeometry args={[0.22, 16, 16]} />
-          <meshBasicMaterial color="#ff6600" transparent opacity={0.3} />
-        </mesh>
+      {/* Bright core glow — outer halo */}
+      <mesh>
+        <sphereGeometry args={[0.22, 16, 16]} />
+        <meshBasicMaterial color="#ff6600" transparent opacity={0.3} />
+      </mesh>
 
-        {/* Bright core — inner bright spot */}
-        <mesh>
-          <sphereGeometry args={[0.12, 16, 16]} />
-          <meshBasicMaterial color="#ffaa44" />
-        </mesh>
+      {/* Bright core — inner bright spot */}
+      <mesh>
+        <sphereGeometry args={[0.12, 16, 16]} />
+        <meshBasicMaterial color="#ffaa44" />
+      </mesh>
 
-        {/* Colored bright stars scattered around the disk */}
-        {BRIGHT_STARS.map((star) => (
-          <BrightStar key={star.id} position={star.pos} color={star.color} />
-        ))}
-      </group>
+      {/* Colored bright stars scattered around the disk */}
+      {BRIGHT_STARS.map((star) => (
+        <BrightStar key={star.id} position={star.pos} color={star.color} />
+      ))}
     </group>
   );
 }
@@ -315,7 +310,7 @@ function CameraAnimator() {
   return null;
 }
 
-function HeroCanvas({
+function BackgroundCanvas({
   particleCount,
   isMobile,
 }: {
@@ -333,7 +328,6 @@ function HeroCanvas({
       <pointLight position={[-5, 5, 5]} color="#00d4ff" intensity={1} />
       <CameraAnimator />
       <ParticleField count={particleCount} />
-      <HeroGalaxy isMobile={isMobile} />
       {!isMobile && (
         <>
           <FloatingObject
@@ -372,6 +366,66 @@ function HeroCanvas({
   );
 }
 
+function InteractiveGalaxyCanvas() {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div
+      className="absolute hidden md:block"
+      style={{
+        right: 0,
+        top: 0,
+        width: "50%",
+        height: "100%",
+        zIndex: 6,
+        cursor: isHovered ? "grab" : "default",
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Canvas
+        camera={{ position: [0, 3, 8], fov: 55 }}
+        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 2]}
+        style={{ width: "100%", height: "100%", touchAction: "none" }}
+      >
+        <ambientLight intensity={0.3} />
+        <pointLight position={[0, 5, 5]} color="#00d4ff" intensity={1.2} />
+        <pointLight position={[0, -3, 3]} color="#a855f7" intensity={0.5} />
+        <Suspense fallback={null}>
+          <InteractiveGalaxyMesh />
+        </Suspense>
+        <OrbitControls
+          enableZoom
+          enablePan={false}
+          autoRotate={false}
+          enableDamping
+          dampingFactor={0.06}
+          minDistance={4}
+          maxDistance={14}
+          rotateSpeed={0.6}
+          zoomSpeed={0.8}
+        />
+      </Canvas>
+
+      {/* Hint label */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 0 : 0.6 }}
+        transition={{ duration: 0.4 }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 pointer-events-none"
+      >
+        <span
+          className="text-xs tracking-widest uppercase"
+          style={{ color: "#818cf8" }}
+        >
+          drag · scroll to explore
+        </span>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function HeroSection() {
   const { particleCount } = useDeviceCapability();
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
@@ -393,12 +447,13 @@ export default function HeroSection() {
         background: "transparent",
       }}
     >
+      {/* Background particle canvas — pointer-events-none so text/buttons remain clickable */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ height: isMobile ? "50vh" : "100%" }}
       >
         <Suspense fallback={null}>
-          <HeroCanvas
+          <BackgroundCanvas
             particleCount={
               isMobile ? Math.floor(particleCount * 0.4) : particleCount
             }
@@ -406,6 +461,9 @@ export default function HeroSection() {
           />
         </Suspense>
       </div>
+
+      {/* Interactive galaxy — own canvas on the right, captures pointer events */}
+      <InteractiveGalaxyCanvas />
 
       <div
         className="absolute inset-0 pointer-events-none"
@@ -506,7 +564,7 @@ export default function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.6 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground hover:text-white transition-colors animate-float"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground hover:text-white transition-colors animate-float z-10"
       >
         <span className="text-xs tracking-widest uppercase">Scroll</span>
         <ChevronDown size={18} />
