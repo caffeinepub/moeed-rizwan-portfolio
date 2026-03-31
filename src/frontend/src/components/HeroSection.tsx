@@ -15,6 +15,49 @@ const GALAXY_COLORS = [
   [0.66, 0.33, 0.97], // purple
 ];
 
+const BRIGHT_STARS = [
+  {
+    id: "star-red",
+    pos: [1.8, 0.05, 1.2] as [number, number, number],
+    color: "#ff3333",
+  },
+  {
+    id: "star-blue",
+    pos: [-2.4, -0.03, 0.8] as [number, number, number],
+    color: "#4488ff",
+  },
+  {
+    id: "star-pink",
+    pos: [1.0, 0.08, -2.8] as [number, number, number],
+    color: "#ff88ff",
+  },
+  {
+    id: "star-cyan",
+    pos: [-1.6, 0.02, -1.9] as [number, number, number],
+    color: "#00ccff",
+  },
+  {
+    id: "star-orange",
+    pos: [3.2, -0.05, -0.6] as [number, number, number],
+    color: "#ffaa00",
+  },
+  {
+    id: "star-purple",
+    pos: [-3.0, 0.04, -1.0] as [number, number, number],
+    color: "#cc44ff",
+  },
+  {
+    id: "star-red2",
+    pos: [2.6, 0.06, 2.2] as [number, number, number],
+    color: "#ff4444",
+  },
+  {
+    id: "star-teal",
+    pos: [-2.0, -0.02, 2.6] as [number, number, number],
+    color: "#44ffcc",
+  },
+];
+
 function ParticleField({ count }: { count: number }) {
   const ref = useRef<THREE.Points>(null);
 
@@ -102,94 +145,152 @@ function FloatingObject({
   );
 }
 
-function IcosahedronWireframe({ isMobile }: { isMobile: boolean }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const ring1Ref = useRef<THREE.Mesh>(null);
-  const ring2Ref = useRef<THREE.Mesh>(null);
-  const ring3Ref = useRef<THREE.Mesh>(null);
-  const ring4Ref = useRef<THREE.Mesh>(null);
+function BrightStar({
+  position,
+  color,
+}: {
+  position: [number, number, number];
+  color: string;
+}) {
+  return (
+    <group position={position}>
+      {/* Glow halo */}
+      <mesh>
+        <sphereGeometry args={[0.07, 8, 8]} />
+        <meshBasicMaterial color={color} transparent opacity={0.4} />
+      </mesh>
+      {/* Star core */}
+      <mesh>
+        <sphereGeometry args={[0.03, 8, 8]} />
+        <meshBasicMaterial color={color} />
+      </mesh>
+    </group>
+  );
+}
+
+function HeroGalaxy({ isMobile }: { isMobile: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  const { positions, colors } = useMemo(() => {
+    const totalParticles = 7000;
+    const coreCount = Math.floor(totalParticles * 0.25);
+    const armCount = totalParticles - coreCount;
+
+    const pos = new Float32Array(totalParticles * 3);
+    const col = new Float32Array(totalParticles * 3);
+
+    const coreRadius = 0.4;
+    const maxRadius = 3.2;
+
+    // Core particles — warm, tightly packed
+    for (let i = 0; i < coreCount; i++) {
+      const r = Math.random() * coreRadius;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = (Math.random() - 0.5) * 0.3;
+      pos[i * 3] = r * Math.cos(theta);
+      pos[i * 3 + 1] = r * Math.sin(phi) * 0.12;
+      pos[i * 3 + 2] = r * Math.sin(theta);
+
+      // Warm white → orange → pale yellow
+      const t = r / coreRadius;
+      const c = new THREE.Color();
+      c.lerpColors(
+        new THREE.Color(1.0, 0.98, 0.95), // near-white hot center
+        new THREE.Color(1.0, 0.55, 0.15), // orange outer core
+        t,
+      );
+      col[i * 3] = c.r;
+      col[i * 3 + 1] = c.g;
+      col[i * 3 + 2] = c.b;
+    }
+
+    // Arm particles — spiral logarithmic layout
+    for (let i = 0; i < armCount; i++) {
+      const idx = coreCount + i;
+      const armIndex = Math.floor(Math.random() * 3);
+      const baseAngle = (armIndex / 3) * Math.PI * 2;
+      const radius =
+        coreRadius + Math.random() ** 0.6 * (maxRadius - coreRadius);
+      const spiralAngle =
+        baseAngle + radius * 1.8 + (Math.random() - 0.5) * 0.5;
+      const x = radius * Math.cos(spiralAngle);
+      const z = radius * Math.sin(spiralAngle);
+      const y = (Math.random() - 0.5) * radius * 0.08;
+
+      pos[idx * 3] = x;
+      pos[idx * 3 + 1] = y;
+      pos[idx * 3 + 2] = z;
+
+      // Warm white near center → blue-white → purple-blue at edge
+      const t = (radius - coreRadius) / (maxRadius - coreRadius);
+      const c = new THREE.Color();
+      if (t < 0.5) {
+        c.lerpColors(
+          new THREE.Color(1.0, 0.95, 0.88), // warm white
+          new THREE.Color(0.75, 0.85, 1.0), // blue-white
+          t * 2,
+        );
+      } else {
+        c.lerpColors(
+          new THREE.Color(0.75, 0.85, 1.0), // blue-white
+          new THREE.Color(0.45, 0.3, 0.85), // purple-blue
+          (t - 0.5) * 2,
+        );
+      }
+      col[idx * 3] = c.r;
+      col[idx * 3 + 1] = c.g;
+      col[idx * 3 + 2] = c.b;
+    }
+
+    return { positions: pos, colors: col };
+  }, []);
 
   useFrame((_, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += delta * 0.25;
-      meshRef.current.rotation.y += delta * 0.4;
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.04;
     }
-    if (ring1Ref.current) ring1Ref.current.rotation.z += delta * 0.3;
-    if (ring2Ref.current) ring2Ref.current.rotation.x += delta * 0.2;
-    if (ring3Ref.current) ring3Ref.current.rotation.y += delta * 0.15;
-    if (ring4Ref.current) ring4Ref.current.rotation.z -= delta * 0.25;
   });
 
   if (isMobile) return null;
 
   return (
-    <group position={[2.8, 0, 0]}>
-      <pointLight color="#00d4ff" intensity={3} distance={8} />
-      <pointLight
-        color="#f472b6"
-        intensity={2}
-        distance={6}
-        position={[0, 2, 2]}
-      />
-      <pointLight
-        color="#fbbf24"
-        intensity={1.5}
-        distance={5}
-        position={[-2, -1, 1]}
-      />
+    <group position={[2.8, 0, 0]} scale={1.2}>
+      <group ref={groupRef}>
+        {/* Galaxy particle field */}
+        <points>
+          <bufferGeometry>
+            <bufferAttribute
+              attach="attributes-position"
+              args={[positions, 3]}
+            />
+            <bufferAttribute attach="attributes-color" args={[colors, 3]} />
+          </bufferGeometry>
+          <pointsMaterial
+            size={0.025}
+            vertexColors
+            transparent
+            opacity={0.95}
+            sizeAttenuation
+          />
+        </points>
 
-      <mesh>
-        <sphereGeometry args={[2.2, 32, 32]} />
-        <meshStandardMaterial
-          color="#00d4ff"
-          transparent
-          opacity={0.03}
-          side={THREE.BackSide}
-        />
-      </mesh>
+        {/* Bright core glow — outer halo */}
+        <mesh>
+          <sphereGeometry args={[0.22, 16, 16]} />
+          <meshBasicMaterial color="#ff6600" transparent opacity={0.3} />
+        </mesh>
 
-      <mesh ref={meshRef}>
-        <icosahedronGeometry args={[1.6, 1]} />
-        <meshStandardMaterial
-          wireframe
-          color="#00d4ff"
-          emissive="#00d4ff"
-          emissiveIntensity={0.6}
-        />
-      </mesh>
+        {/* Bright core — inner bright spot */}
+        <mesh>
+          <sphereGeometry args={[0.12, 16, 16]} />
+          <meshBasicMaterial color="#ffaa44" />
+        </mesh>
 
-      <mesh ref={ring1Ref} rotation={[Math.PI / 3, 0.3, 0]}>
-        <torusGeometry args={[2.1, 0.015, 8, 100]} />
-        <meshStandardMaterial
-          color="#a855f7"
-          emissive="#a855f7"
-          emissiveIntensity={0.9}
-        />
-      </mesh>
-      <mesh ref={ring2Ref} rotation={[0, 0.5, Math.PI / 4]}>
-        <torusGeometry args={[2.4, 0.01, 8, 100]} />
-        <meshStandardMaterial
-          color="#fbbf24"
-          emissive="#fbbf24"
-          emissiveIntensity={0.8}
-        />
-      </mesh>
-      <mesh ref={ring3Ref} rotation={[Math.PI / 2, 0.2, 0.3]}>
-        <torusGeometry args={[1.8, 0.012, 8, 100]} />
-        <meshStandardMaterial
-          color="#34d399"
-          emissive="#34d399"
-          emissiveIntensity={0.8}
-        />
-      </mesh>
-      <mesh ref={ring4Ref} rotation={[0.4, Math.PI / 3, 0.1]}>
-        <torusGeometry args={[2.6, 0.008, 8, 100]} />
-        <meshStandardMaterial
-          color="#f472b6"
-          emissive="#f472b6"
-          emissiveIntensity={0.7}
-        />
-      </mesh>
+        {/* Colored bright stars scattered around the disk */}
+        {BRIGHT_STARS.map((star) => (
+          <BrightStar key={star.id} position={star.pos} color={star.color} />
+        ))}
+      </group>
     </group>
   );
 }
@@ -207,7 +308,7 @@ function CameraAnimator() {
     if (progress.current < 1) {
       progress.current = Math.min(1, progress.current + delta * 0.6);
       const t = 1 - (1 - progress.current) ** 3;
-      camera.position.z = 14 - t * 9;
+      camera.position.z = 14 - t * 8;
     }
   });
 
@@ -223,7 +324,7 @@ function HeroCanvas({
 }) {
   return (
     <Canvas
-      camera={{ position: [0, 0, 14], fov: 60 }}
+      camera={{ position: [0, 0, 14], fov: 65 }}
       gl={{ antialias: true, alpha: true }}
       dpr={[1, 2]}
       style={{ position: "absolute", inset: 0, touchAction: "none" }}
@@ -232,7 +333,7 @@ function HeroCanvas({
       <pointLight position={[-5, 5, 5]} color="#00d4ff" intensity={1} />
       <CameraAnimator />
       <ParticleField count={particleCount} />
-      <IcosahedronWireframe isMobile={isMobile} />
+      <HeroGalaxy isMobile={isMobile} />
       {!isMobile && (
         <>
           <FloatingObject
