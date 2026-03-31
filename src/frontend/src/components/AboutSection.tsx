@@ -1,3 +1,4 @@
+import { Html } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { motion } from "motion/react";
 import { Suspense, useMemo, useRef } from "react";
@@ -6,73 +7,119 @@ import { useDeviceCapability } from "../hooks/useDeviceCapability";
 
 const STATS = [
   { value: "7+", label: "Years Experience", color: "#34d399" },
-  { value: "18+", label: "Live Projects", color: "#00d4ff" },
+  { value: "15+", label: "Live Projects", color: "#00d4ff" },
   { value: "50+", label: "Happy Clients", color: "#a855f7" },
   { value: "5", label: "Roles Held", color: "#fbbf24" },
 ];
 
-const BRIGHT_STARS = [
+const SKILL_PLANETS = [
   {
     id: "star-red",
     pos: [1.8, 0.05, 1.2] as [number, number, number],
-    color: "#ff3333",
+    color: "#ff4466",
+    skill: "React",
   },
   {
     id: "star-blue",
     pos: [-2.4, -0.03, 0.8] as [number, number, number],
     color: "#4488ff",
+    skill: "Next.js",
   },
   {
     id: "star-pink",
     pos: [1.0, 0.08, -2.8] as [number, number, number],
     color: "#ff88ff",
+    skill: "AI / ML",
   },
   {
     id: "star-cyan",
     pos: [-1.6, 0.02, -1.9] as [number, number, number],
     color: "#00ccff",
+    skill: "Node.js",
   },
   {
     id: "star-orange",
     pos: [3.2, -0.05, -0.6] as [number, number, number],
     color: "#ffaa00",
+    skill: "WordPress",
   },
   {
     id: "star-purple",
     pos: [-3.0, 0.04, -1.0] as [number, number, number],
     color: "#cc44ff",
+    skill: "Python",
   },
   {
     id: "star-red2",
     pos: [2.6, 0.06, 2.2] as [number, number, number],
-    color: "#ff4444",
+    color: "#ff6644",
+    skill: "TypeScript",
   },
   {
     id: "star-teal",
     pos: [-2.0, -0.02, 2.6] as [number, number, number],
     color: "#44ffcc",
+    skill: "MongoDB",
   },
 ];
 
-function BrightStar({
+function SkillPlanet({
   position,
   color,
+  skill,
 }: {
   position: [number, number, number];
   color: string;
+  skill: string;
 }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.position.y =
+        position[1] +
+        Math.sin(state.clock.elapsedTime * 0.6 + position[0]) * 0.06;
+    }
+  });
+
   return (
     <group position={position}>
       {/* Glow halo */}
       <mesh>
-        <sphereGeometry args={[0.07, 8, 8]} />
-        <meshBasicMaterial color={color} transparent opacity={0.4} />
+        <sphereGeometry args={[0.1, 12, 12]} />
+        <meshBasicMaterial color={color} transparent opacity={0.25} />
       </mesh>
-      {/* Star core */}
-      <mesh>
-        <sphereGeometry args={[0.03, 8, 8]} />
+      {/* Planet core */}
+      <mesh ref={meshRef}>
+        <sphereGeometry args={[0.055, 12, 12]} />
         <meshBasicMaterial color={color} />
       </mesh>
+      {/* Skill label */}
+      <Html
+        position={[0, 0.22, 0]}
+        center
+        distanceFactor={6}
+        style={{ pointerEvents: "none" }}
+      >
+        <div
+          style={{
+            color,
+            fontSize: "9px",
+            fontWeight: 700,
+            fontFamily: "monospace",
+            whiteSpace: "nowrap",
+            textShadow: `0 0 8px ${color}99, 0 0 2px #000`,
+            letterSpacing: "0.08em",
+            padding: "2px 5px",
+            borderRadius: "4px",
+            background: `${color}14`,
+            border: `1px solid ${color}35`,
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          {skill}
+        </div>
+      </Html>
     </group>
   );
 }
@@ -100,12 +147,11 @@ function Galaxy() {
       pos[i * 3 + 1] = r * Math.sin(phi) * 0.12;
       pos[i * 3 + 2] = r * Math.sin(theta);
 
-      // Warm white → orange → pale yellow
       const t = r / coreRadius;
       const c = new THREE.Color();
       c.lerpColors(
-        new THREE.Color(1.0, 0.98, 0.95), // near-white hot center
-        new THREE.Color(1.0, 0.55, 0.15), // orange outer core
+        new THREE.Color(1.0, 0.98, 0.95),
+        new THREE.Color(1.0, 0.55, 0.15),
         t,
       );
       col[i * 3] = c.r;
@@ -130,19 +176,18 @@ function Galaxy() {
       pos[idx * 3 + 1] = y;
       pos[idx * 3 + 2] = z;
 
-      // Warm white near center → blue-white → purple-blue at edge
       const t = (radius - coreRadius) / (maxRadius - coreRadius);
       const c = new THREE.Color();
       if (t < 0.5) {
         c.lerpColors(
-          new THREE.Color(1.0, 0.95, 0.88), // warm white
-          new THREE.Color(0.75, 0.85, 1.0), // blue-white
+          new THREE.Color(1.0, 0.95, 0.88),
+          new THREE.Color(0.75, 0.85, 1.0),
           t * 2,
         );
       } else {
         c.lerpColors(
-          new THREE.Color(0.75, 0.85, 1.0), // blue-white
-          new THREE.Color(0.45, 0.3, 0.85), // purple-blue
+          new THREE.Color(0.75, 0.85, 1.0),
+          new THREE.Color(0.45, 0.3, 0.85),
           (t - 0.5) * 2,
         );
       }
@@ -189,9 +234,14 @@ function Galaxy() {
         <meshBasicMaterial color="#ffaa44" />
       </mesh>
 
-      {/* Colored bright stars scattered around the disk */}
-      {BRIGHT_STARS.map((star) => (
-        <BrightStar key={star.id} position={star.pos} color={star.color} />
+      {/* Skill planets scattered around the disk */}
+      {SKILL_PLANETS.map((planet) => (
+        <SkillPlanet
+          key={planet.id}
+          position={planet.pos}
+          color={planet.color}
+          skill={planet.skill}
+        />
       ))}
     </group>
   );
@@ -251,7 +301,7 @@ export default function AboutSection() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Galaxy — shows first on mobile */}
+          {/* Galaxy with skill planets — shows first on mobile */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -287,7 +337,7 @@ export default function AboutSection() {
                 className="absolute bottom-4 left-1/2 -translate-x-1/2 glass-light rounded-full px-4 py-2 text-xs font-medium text-center whitespace-nowrap"
                 style={{ color: "#a855f7" }}
               >
-                ✨ Galaxy of Solutions · Innovation at Scale
+                ✨ Galaxy of Skills · Innovation at Scale
               </div>
             </div>
           </motion.div>

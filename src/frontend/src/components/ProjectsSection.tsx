@@ -24,27 +24,15 @@ const PROJECTS = [
   },
   {
     name: "Osama Mehmood CEO",
-    url: "https://www.osamamehmood.ceo/",
+    url: "https://osama-mehmood-1-r3qv.vercel.app/",
     desc: "Executive personal brand website built to establish thought leadership and digital authority.",
-    tags: ["Personal Brand", "Web Design"],
-  },
-  {
-    name: "Zubies",
-    url: "http://zubies.co/",
-    desc: "Modern e-commerce retail store with optimized product listings and checkout experience.",
-    tags: ["E-commerce", "MERN", "Shopify"],
+    tags: ["Personal Brand", "Next.js"],
   },
   {
     name: "Fairy Wren Stories AI",
     url: "http://fairywrenstories.ai/",
     desc: "AI-powered children's storytelling app generating personalized, imaginative narratives.",
     tags: ["AI", "OpenAI", "React"],
-  },
-  {
-    name: "Haris Real Estate",
-    url: "http://harisrealestate.com/",
-    desc: "Real estate listings platform with advanced property search and agent management.",
-    tags: ["Real Estate", "Full Stack"],
   },
   {
     name: "Deep Tutor",
@@ -59,12 +47,6 @@ const PROJECTS = [
     tags: ["Medical", "WordPress"],
   },
   {
-    name: "My Trusted Telecom",
-    url: "http://mytrustedtelecom.com/",
-    desc: "Telecom services platform offering plans, coverage maps, and account management.",
-    tags: ["Telecom", "React"],
-  },
-  {
     name: "Agency of Agencies",
     url: "http://agencyofagencies.vercel.app/",
     desc: "Marketing agency directory connecting businesses with specialized agencies worldwide.",
@@ -74,55 +56,55 @@ const PROJECTS = [
     name: "Custom Boxes Canada",
     url: "https://www.customboxescanada.ca/",
     desc: "Custom packaging e-commerce platform with design tools and bulk ordering.",
-    tags: ["E-commerce", "Packaging"],
+    tags: ["E-commerce", "WooCommerce", "WordPress"],
   },
   {
     name: "Peeraan",
     url: "https://peeraan.com/",
     desc: "Online marketplace connecting buyers and sellers with a seamless transaction experience.",
-    tags: ["Marketplace", "Full Stack"],
+    tags: ["Marketplace", "Shopify"],
   },
   {
     name: "Chor Bazar",
     url: "https://chorbazar.pk/",
     desc: "Pakistan's popular classifieds and marketplace for buying and selling goods.",
-    tags: ["Classifieds", "MERN"],
+    tags: ["Classifieds", "Shopify", "E-commerce"],
   },
   {
     name: "Premium Packaging America",
     url: "https://premiumpackagingamerica.com/",
     desc: "Premium packaging solutions e-commerce with custom branding and fast shipping.",
-    tags: ["E-commerce", "Packaging"],
+    tags: ["E-commerce", "WooCommerce", "WordPress"],
   },
   {
     name: "Transvision Immigration",
     url: "https://www.transvisionimmigration.com/",
     desc: "Immigration consultancy platform streamlining visa applications and case management.",
-    tags: ["Immigration", "SaaS"],
+    tags: ["Immigration", "WordPress"],
   },
   {
     name: "eFone",
     url: "https://efone.app/",
     desc: "Modern VoIP communication app with HD calling and team collaboration features.",
-    tags: ["VoIP", "React", "Real-time"],
+    tags: ["VoIP", "WordPress"],
   },
   {
     name: "OneVision",
     url: "https://onevision.io/",
     desc: "Tech solutions SaaS platform empowering businesses with scalable digital infrastructure.",
-    tags: ["SaaS", "Tech", "Full Stack"],
+    tags: ["SaaS", "Tech", "Next.js"],
   },
   {
     name: "Lazzat",
     url: "https://www.lazzat.ca/",
     desc: "Canadian food and restaurant brand with online ordering and menu management.",
-    tags: ["Food", "E-commerce"],
+    tags: ["Food", "React", "Vite", "TypeScript"],
   },
   {
     name: "Sonic Accountants",
     url: "https://www.sonicaccountants.com/",
     desc: "Accounting and financial services platform with automated reporting and client portal.",
-    tags: ["Finance", "SaaS"],
+    tags: ["Finance", "TypeScript", "Vite"],
   },
 ];
 
@@ -144,6 +126,7 @@ const TAG_COLORS: Record<string, string> = {
   "Real Estate": "#fbbf24",
   Medical: "#34d399",
   WordPress: "#818cf8",
+  WooCommerce: "#a855f7",
   Telecom: "#fb923c",
   Directory: "#f472b6",
   Packaging: "#fbbf24",
@@ -155,6 +138,8 @@ const TAG_COLORS: Record<string, string> = {
   Tech: "#00d4ff",
   Food: "#fb923c",
   Finance: "#fbbf24",
+  TypeScript: "#00d4ff",
+  Vite: "#f472b6",
 };
 
 function getTagColor(tag: string): string {
@@ -262,7 +247,7 @@ export default function ProjectsSection() {
             </span>
           </h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-            18 production-grade applications shipped for clients worldwide.
+            15 production-grade applications shipped for clients worldwide.
           </p>
         </motion.div>
 

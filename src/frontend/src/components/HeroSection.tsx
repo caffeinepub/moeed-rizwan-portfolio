@@ -1,4 +1,4 @@
-import { OrbitControls } from "@react-three/drei";
+import { Html, OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ChevronDown, Download, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
@@ -59,6 +59,121 @@ const BRIGHT_STARS = [
   },
 ];
 
+const SKILL_PLANETS = [
+  {
+    skill: "React",
+    radius: 0.9,
+    angleOffset: 0.0,
+    speed: 0.32,
+    color: "#61DAFB",
+    size: 0.072,
+  },
+  {
+    skill: "Node.js",
+    radius: 1.15,
+    angleOffset: 1.2,
+    speed: 0.27,
+    color: "#68A063",
+    size: 0.065,
+  },
+  {
+    skill: "Python",
+    radius: 1.35,
+    angleOffset: 2.5,
+    speed: 0.23,
+    color: "#FFD43B",
+    size: 0.078,
+  },
+  {
+    skill: "TypeScript",
+    radius: 1.55,
+    angleOffset: 0.7,
+    speed: 0.19,
+    color: "#3B9AE1",
+    size: 0.065,
+  },
+  {
+    skill: "Next.js",
+    radius: 1.8,
+    angleOffset: 1.9,
+    speed: 0.16,
+    color: "#e0e0e0",
+    size: 0.072,
+  },
+  {
+    skill: "MongoDB",
+    radius: 2.05,
+    angleOffset: 3.3,
+    speed: 0.135,
+    color: "#47A248",
+    size: 0.065,
+  },
+  {
+    skill: "AI/Automation",
+    radius: 2.25,
+    angleOffset: 0.5,
+    speed: 0.115,
+    color: "#f472b6",
+    size: 0.09,
+  },
+  {
+    skill: "GraphQL",
+    radius: 2.45,
+    angleOffset: 2.0,
+    speed: 0.095,
+    color: "#E535AB",
+    size: 0.062,
+  },
+  {
+    skill: "Django",
+    radius: 2.6,
+    angleOffset: 4.2,
+    speed: 0.085,
+    color: "#092E20",
+    size: 0.068,
+  },
+  {
+    skill: "WordPress",
+    radius: 2.75,
+    angleOffset: 1.0,
+    speed: 0.078,
+    color: "#21759B",
+    size: 0.072,
+  },
+  {
+    skill: "Shopify",
+    radius: 2.92,
+    angleOffset: 3.8,
+    speed: 0.068,
+    color: "#96BF48",
+    size: 0.065,
+  },
+  {
+    skill: "SEO",
+    radius: 3.05,
+    angleOffset: 2.8,
+    speed: 0.058,
+    color: "#34d399",
+    size: 0.082,
+  },
+  {
+    skill: "System Design",
+    radius: 3.18,
+    angleOffset: 0.3,
+    speed: 0.052,
+    color: "#a855f7",
+    size: 0.072,
+  },
+  {
+    skill: "REST APIs",
+    radius: 1.68,
+    angleOffset: 3.6,
+    speed: 0.175,
+    color: "#fb923c",
+    size: 0.065,
+  },
+];
+
 function ParticleField({ count }: { count: number }) {
   const ref = useRef<THREE.Points>(null);
 
@@ -87,7 +202,6 @@ function ParticleField({ count }: { count: number }) {
       ref.current.rotation.y += delta * 0.012;
       ref.current.rotation.x += delta * 0.005;
     }
-    // Mouse parallax
     const mx = state.mouse.x * 0.3;
     const my = state.mouse.y * 0.3;
     camera.position.x += (mx - camera.position.x) * delta * 2;
@@ -149,18 +263,13 @@ function FloatingObject({
 function BrightStar({
   position,
   color,
-}: {
-  position: [number, number, number];
-  color: string;
-}) {
+}: { position: [number, number, number]; color: string }) {
   return (
     <group position={position}>
-      {/* Glow halo */}
       <mesh>
         <sphereGeometry args={[0.07, 8, 8]} />
         <meshBasicMaterial color={color} transparent opacity={0.4} />
       </mesh>
-      {/* Star core */}
       <mesh>
         <sphereGeometry args={[0.03, 8, 8]} />
         <meshBasicMaterial color={color} />
@@ -169,10 +278,98 @@ function BrightStar({
   );
 }
 
-// Standalone galaxy mesh for use inside its own Canvas
+function SkillPlanet({
+  skill,
+  radius,
+  angleOffset,
+  speed,
+  color,
+  size,
+}: {
+  skill: string;
+  radius: number;
+  angleOffset: number;
+  speed: number;
+  color: string;
+  size: number;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      const angle = state.clock.elapsedTime * speed + angleOffset;
+      groupRef.current.position.x = Math.cos(angle) * radius;
+      groupRef.current.position.z = Math.sin(angle) * radius;
+      groupRef.current.position.y =
+        Math.sin(state.clock.elapsedTime * speed * 0.4 + angleOffset) * 0.12;
+    }
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.015;
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      {/* Planet glow halo */}
+      <mesh>
+        <sphereGeometry args={[size * 1.8, 8, 8]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={hovered ? 0.28 : 0.14}
+        />
+      </mesh>
+      {/* Planet body */}
+      <mesh
+        ref={meshRef}
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={() => setHovered(false)}
+      >
+        <sphereGeometry args={[size, 14, 14]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={hovered ? 0.9 : 0.55}
+          roughness={0.45}
+          metalness={0.3}
+        />
+      </mesh>
+      {/* Skill label */}
+      <Html
+        position={[0, size * 3.2, 0]}
+        center
+        style={{ pointerEvents: "none" }}
+      >
+        <div
+          style={{
+            color: color,
+            fontSize: "8.5px",
+            fontFamily: "'Space Mono', 'Courier New', monospace",
+            fontWeight: "700",
+            whiteSpace: "nowrap",
+            textShadow: `0 0 10px ${color}, 0 0 20px ${color}80`,
+            background: "rgba(0, 0, 0, 0.65)",
+            backdropFilter: "blur(4px)",
+            padding: "2px 6px",
+            borderRadius: "4px",
+            border: `1px solid ${color}50`,
+            letterSpacing: "0.04em",
+            opacity: hovered ? 1 : 0.88,
+            transform: hovered ? "scale(1.15)" : "scale(1)",
+            transition: "all 0.2s ease",
+          }}
+        >
+          {skill}
+        </div>
+      </Html>
+    </group>
+  );
+}
+
 function InteractiveGalaxyMesh() {
   const groupRef = useRef<THREE.Group>(null);
-  const isDragging = useRef(false);
 
   const { positions, colors } = useMemo(() => {
     const totalParticles = 7000;
@@ -185,7 +382,6 @@ function InteractiveGalaxyMesh() {
     const coreRadius = 0.4;
     const maxRadius = 3.2;
 
-    // Core particles — warm, tightly packed
     for (let i = 0; i < coreCount; i++) {
       const r = Math.random() * coreRadius;
       const theta = Math.random() * Math.PI * 2;
@@ -206,7 +402,6 @@ function InteractiveGalaxyMesh() {
       col[i * 3 + 2] = c.b;
     }
 
-    // Arm particles — spiral logarithmic layout
     for (let i = 0; i < armCount; i++) {
       const idx = coreCount + i;
       const armIndex = Math.floor(Math.random() * 3);
@@ -246,13 +441,6 @@ function InteractiveGalaxyMesh() {
     return { positions: pos, colors: col };
   }, []);
 
-  // Auto-rotate only when not dragging
-  useFrame((_, delta) => {
-    if (groupRef.current && !isDragging.current) {
-      groupRef.current.rotation.y += delta * 0.04;
-    }
-  });
-
   return (
     <group ref={groupRef}>
       {/* Galaxy particle field */}
@@ -270,21 +458,24 @@ function InteractiveGalaxyMesh() {
         />
       </points>
 
-      {/* Bright core glow — outer halo */}
+      {/* Core glow */}
       <mesh>
         <sphereGeometry args={[0.22, 16, 16]} />
         <meshBasicMaterial color="#ff6600" transparent opacity={0.3} />
       </mesh>
-
-      {/* Bright core — inner bright spot */}
       <mesh>
         <sphereGeometry args={[0.12, 16, 16]} />
         <meshBasicMaterial color="#ffaa44" />
       </mesh>
 
-      {/* Colored bright stars scattered around the disk */}
+      {/* Bright accent stars */}
       {BRIGHT_STARS.map((star) => (
         <BrightStar key={star.id} position={star.pos} color={star.color} />
+      ))}
+
+      {/* Skill planets */}
+      {SKILL_PLANETS.map((p) => (
+        <SkillPlanet key={p.skill} {...p} />
       ))}
     </group>
   );
@@ -367,8 +558,6 @@ function BackgroundCanvas({
 }
 
 function InteractiveGalaxyCanvas() {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <div
       className="absolute hidden md:block"
@@ -378,10 +567,8 @@ function InteractiveGalaxyCanvas() {
         width: "50%",
         height: "100%",
         zIndex: 6,
-        cursor: isHovered ? "grab" : "default",
+        cursor: "grab",
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <Canvas
         camera={{ position: [0, 3, 8], fov: 55 }}
@@ -407,21 +594,6 @@ function InteractiveGalaxyCanvas() {
           zoomSpeed={0.8}
         />
       </Canvas>
-
-      {/* Hint label */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isHovered ? 0 : 0.6 }}
-        transition={{ duration: 0.4 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 pointer-events-none"
-      >
-        <span
-          className="text-xs tracking-widest uppercase"
-          style={{ color: "#818cf8" }}
-        >
-          drag · scroll to explore
-        </span>
-      </motion.div>
     </div>
   );
 }
@@ -442,12 +614,9 @@ export default function HeroSection() {
     <section
       id="hero"
       className="relative overflow-hidden flex items-center"
-      style={{
-        minHeight: "100svh",
-        background: "transparent",
-      }}
+      style={{ minHeight: "100svh", background: "transparent" }}
     >
-      {/* Background particle canvas — pointer-events-none so text/buttons remain clickable */}
+      {/* Background particle canvas */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ height: isMobile ? "50vh" : "100%" }}
@@ -462,7 +631,7 @@ export default function HeroSection() {
         </Suspense>
       </div>
 
-      {/* Interactive galaxy — own canvas on the right, captures pointer events */}
+      {/* Interactive galaxy — own canvas on the right */}
       <InteractiveGalaxyCanvas />
 
       <div
