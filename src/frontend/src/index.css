@@ -1,0 +1,308 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.75rem;
+    /* Pure black galaxy palette */
+    --background: 0.04 0.01 250;
+    --foreground: 0.97 0.005 250;
+    --card: 0.06 0.02 254;
+    --card-foreground: 0.97 0.005 250;
+    --popover: 0.06 0.02 254;
+    --popover-foreground: 0.97 0.005 250;
+    --primary: 0.82 0.18 220;
+    --primary-foreground: 0.04 0.01 250;
+    --secondary: 0.65 0.28 295;
+    --secondary-foreground: 0.97 0.005 250;
+    --muted: 0.12 0.03 254;
+    --muted-foreground: 0.65 0.012 250;
+    --accent: 0.65 0.28 295;
+    --accent-foreground: 0.97 0.005 250;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.985 0 0;
+    --border: 0.7 0.05 220 / 12%;
+    --input: 0.7 0.05 220 / 12%;
+    --ring: 0.82 0.18 220;
+    --chart-1: 0.82 0.18 220;
+    --chart-2: 0.65 0.28 295;
+    --chart-3: 0.7 0.2 160;
+    --chart-4: 0.75 0.22 300;
+    --chart-5: 0.8 0.15 260;
+    --sidebar: 0.05 0.02 254;
+    --sidebar-foreground: 0.97 0.005 250;
+    --sidebar-primary: 0.82 0.18 220;
+    --sidebar-primary-foreground: 0.04 0.01 250;
+    --sidebar-accent: 0.12 0.03 254;
+    --sidebar-accent-foreground: 0.97 0.005 250;
+    --sidebar-border: 0.7 0.05 220 / 12%;
+    --sidebar-ring: 0.82 0.18 220;
+  }
+
+  .light {
+    --background: 0.97 0.005 250;
+    --foreground: 0.12 0.04 254;
+    --card: 0.94 0.01 250;
+    --card-foreground: 0.12 0.04 254;
+    --popover: 0.94 0.01 250;
+    --popover-foreground: 0.12 0.04 254;
+    --primary: 0.58 0.22 220;
+    --primary-foreground: 0.97 0.005 250;
+    --secondary: 0.52 0.28 295;
+    --secondary-foreground: 0.97 0.005 250;
+    --muted: 0.9 0.015 250;
+    --muted-foreground: 0.45 0.02 250;
+    --accent: 0.52 0.28 295;
+    --accent-foreground: 0.97 0.005 250;
+    --border: 0.7 0.04 254 / 30%;
+    --input: 0.7 0.04 254 / 30%;
+    --ring: 0.58 0.22 220;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Space Grotesk", sans-serif;
+    overflow-x: hidden;
+    background: #000005;
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #000005;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(oklch(0.82 0.18 220), oklch(0.65 0.28 295));
+    border-radius: 3px;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(0.82 0.18 220) 0%,
+      oklch(0.75 0.25 270) 50%,
+      oklch(0.65 0.28 295) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #fbbf24 0%, #fb923c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-pink {
+    background: linear-gradient(135deg, #f472b6 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass {
+    background: oklch(0.08 0.03 254 / 35%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid oklch(0.82 0.18 220 / 12%);
+  }
+
+  .glass-light {
+    background: oklch(0.07 0.02 254 / 25%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid oklch(0.82 0.18 220 / 10%);
+  }
+
+  .neon-glow-cyan {
+    box-shadow: 0 0 20px oklch(0.82 0.18 220 / 35%), 0 0 40px
+      oklch(0.82 0.18 220 / 15%);
+  }
+
+  .neon-glow-purple {
+    box-shadow: 0 0 20px oklch(0.65 0.28 295 / 35%), 0 0 40px
+      oklch(0.65 0.28 295 / 15%);
+  }
+
+  .neon-border {
+    border: 1px solid oklch(0.82 0.18 220 / 40%);
+  }
+
+  .btn-primary {
+    background: linear-gradient(
+      135deg,
+      oklch(0.82 0.18 220),
+      oklch(0.65 0.28 295)
+    );
+    box-shadow: 0 0 25px oklch(0.82 0.18 220 / 40%), 0 4px 15px
+      oklch(0.65 0.28 295 / 25%);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.15),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  .btn-primary:hover::after {
+    left: 100%;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 40px oklch(0.82 0.18 220 / 60%), 0 6px 25px
+      oklch(0.65 0.28 295 / 40%);
+    transform: translateY(-1px);
+  }
+
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-name {
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2.5s linear infinite;
+    background-size: 200% 100%;
+  }
+
+  .tilt-card {
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px oklch(0.82 0.18 220 / 50%), 0 0 40px
+      oklch(0.82 0.18 220 / 25%);
+  }
+  50% {
+    box-shadow: 0 0 40px oklch(0.82 0.18 220 / 80%), 0 0 80px
+      oklch(0.82 0.18 220 / 40%), 0 0 100px oklch(0.65 0.28 295 / 30%);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes orb-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.5);
+    opacity: 0.3;
+  }
+}
+
+@keyframes ping-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-orb-pulse {
+  animation: orb-pulse 2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.animate-ping-ring {
+  animation: ping-ring 1.5s ease-out infinite;
+}
